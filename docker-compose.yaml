@@ -1,0 +1,20 @@
+services:
+  gateway:
+    build: ../ultra-market/gateway
+    ports:
+      - "8000:8000"
+  
+  auth:
+    build: ../ultra-market/auth
+  
+  catalog:
+    build: ../ultra-market/catalog
+
+  orders:
+    build: ../ultra-market/orders
+
+  tg-notifications:
+    build: ../ultra-market/tg-notifications
+
+  rabbitmq:
+    image: rabbitmq:3-management
