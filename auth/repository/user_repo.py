@@ -8,7 +8,7 @@ async def create_user(session: AsyncSession, email: str, password_hash: str) -> 
     session.add(user)
 
     await session.commit()
-    await session.refresh()
+    await session.refresh(user)
 
     return user
 
