@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
+from core.dependencies import get_current_user
 from db.session import get_db
-from schemas.user import UserCreate, UserResponse
-from service.auth_service import user_register, user_login
+from schemas.user import UserCreate, UserResponse, RefreshRequest
+from service.auth_service import refresh_token, user_register, user_login
 
 router = APIRouter()
 DBConn = Annotated[AsyncSession, Depends(get_db)]
@@ -17,3 +18,11 @@ async def register_user(user: UserCreate, conn: DBConn):
 async def login_user(user: UserCreate, conn: DBConn):
     tokens = await user_login(conn, user.email, user.password)
     return tokens
+
+@router.get("/me", response_model=UserResponse)
+async def get_me(current_user=Depends(get_current_user)):
+    return current_user
+
+@router.post("/refresh")
+async def refresh_user(data: RefreshRequest):
+    return await refresh_token(data.refresh_token)

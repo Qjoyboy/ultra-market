@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from repository.user_repo import get_by_email, create_user
-from core.security import create_access_token, hash_password, verify_password, create_refresh_token
+from core.security import create_access_token, decode_token, hash_password, verify_password, create_refresh_token
 from db.models import User
 
 async def user_register(session: AsyncSession, email: str, password: str) -> User:
@@ -33,3 +33,17 @@ async def user_login(session, email: str, password: str):
         "access_token": access_token,
         "refresh_token": refresh_token,
     }
+
+async def refresh_token(refresh_token: str):
+    payload = decode_token(refresh_token)
+
+    if not payload or payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
+    access_token = create_access_token(int(user_id))
+
+    return {"access_token": access_token}
