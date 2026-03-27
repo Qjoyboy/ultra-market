@@ -1,5 +1,4 @@
-DC = docker-compose -f docker-compose.yaml
 up:
-	$(DC) up
+	docker compose up --build
 down: 
-	$(DC) down
+	docker compose down
