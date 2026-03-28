@@ -7,5 +7,9 @@ from db.models import User
 
 app = FastAPI()
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 app.include_router(auth_router, prefix='/auth')
 app.include_router(internal_router)
