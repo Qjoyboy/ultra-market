@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+import httpx
+from fastapi import APIRouter, Depends
 from typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.dependencies import get_current_user
@@ -12,6 +13,17 @@ DBConn = Annotated[AsyncSession, Depends(get_db)]
 @router.post("/register", response_model=UserResponse, status_code=201)
 async def register_user(user: UserCreate, conn: DBConn):
     created_user = await user_register(conn, user.email, user.password)
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "http://user:8000/users/",
+            json={
+                "id": created_user.id,
+                "email": created_user.email
+            }
+        )
+        if response.status_code != 200:
+            raise Exception("User service error")
     return created_user
 
 @router.post("/login")
